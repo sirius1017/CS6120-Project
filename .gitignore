@@ -1,0 +1,68 @@
+.qodo
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Environment
+.env
+.env.*
+*.env
+*.venv
+venv/
+ENV/
+env/
+env.bak/
+*.egg-info/
+pip-log.txt
+.rag/
+
+# Conda environment files
+*.conda
+*.ipynb_checkpoints
+.ipynb_checkpoints/
+conda-meta/
+*.lock
+
+# Model checkpoints / downloads
+hf_cache/
+hf_models/
+huggingface/
+models/
+*.bin
+*.safetensors
+*.pt
+*.ckpt
+
+# Chroma vectorstore
+chroma_db/
+chroma_db/*
+*.sqlite3
+
+# VSCode
+.vscode/
+.code-workspace
+
+# PyCharm
+.idea/
+
+# OS-specific
+Icon?
+Thumbs.db
+
+
+# Logs and test outputs
+*.log
+*.tmp
+logs/
+debug.log
+*.test_output
+*.checkpoint
