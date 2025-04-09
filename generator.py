@@ -1,12 +1,9 @@
-# generator.py
-
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
 import torch
 import os
 from SUPPORTED_MODELS import SUPPORTED_MODELS 
 
 
-# 用于避免重复加载的缓存
 generator_cache = {}
 
 def load_generator(model_key="deepseek", device="cpu"):
@@ -35,7 +32,7 @@ def load_generator(model_key="deepseek", device="cpu"):
         model=model,
         tokenizer=tokenizer,
         device=0 if device == "cuda" and torch.cuda.is_available() else -1,
-        max_new_tokens=100, ###############可调整
+        max_new_tokens=100, 
         do_sample=True,
         temperature=0.7,
     )

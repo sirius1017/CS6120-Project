@@ -1,4 +1,3 @@
-
 import json
 from typing import List, Dict
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -7,9 +6,10 @@ from langchain.docstore.document import Document
 # from langchain.embeddings import HuggingFaceEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings # 使用huggingface而不用openai，这样可以直接把模型下载到本地使用，不用call api
 
+#怎么把data转换成embeddings
 #调优：每个recipe作为一个chunk而不是以长度分段
 #调优：encoder现在用的是HuggingFaceEmbeddings，可能可以换一下试试
-#加速：batch embedding, bach write to chroma db
+#加速：batch embedding, batch write to chroma db
 #threshold：test用，最后需要去掉
 #避免需要手动清空chroma_db的情况
 
