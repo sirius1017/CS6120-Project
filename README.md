@@ -11,3 +11,8 @@ pip install -U langchain-community
 pip install sentence-transformers
 pip install -U langchain-huggingface
 pip install transformers accelerate
+
+# how to run
+
+run python app.py to use the RAG
+run python test_model.py to use the LLM without RAG
