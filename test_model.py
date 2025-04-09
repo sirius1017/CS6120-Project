@@ -4,7 +4,6 @@ import torch
 from SUPPORTED_MODELS import SUPPORTED_MODELS 
 
 
-
 def ensure_model(model_key="tinyllama"):
     """确保模型存在本地并加载"""
     if model_key not in SUPPORTED_MODELS:
@@ -56,7 +55,7 @@ if __name__ == "__main__":
     model_key = "deepseek"
 
     pipe = ensure_model(model_key)
-    print(f"Using model {SUPPORTED_MODELS[model_key]["hf_id"]}")
+    print(f'Using model {SUPPORTED_MODELS[model_key]["hf_id"]}')
     
     while True:
         print("🧑‍🍳 No-RAG chef is ready. Type your cooking question!\n(Type 'exit' to quit)")
