@@ -10,6 +10,7 @@ pip install -U langchain-community
 pip install sentence-transformers
 pip install -U langchain-huggingface
 pip install transformers accelerate
+pip install -U langchain-chroma
 
 
 # tests
@@ -36,6 +37,12 @@ Make something with strawberries, granola, and yogurt.
 Suggest a dessert using tofu, sesame, and brown sugar.
 
 ## edge cases
+We could test "Out of Vocabulary" (0OV) words, though we're more interested in the ML parts of youralgorithms. For example, for cooking recipes, l could type in something like:
+1. "Can you find me a recipe that does not have cheries and berries?" (This may be somewhat challenging
+because of the negation.)
+2. "What's a gluten-free recipe for pies that uses bread and meat?" (Your LLM may not be able to answer
+this)
+3. "l've seen a recipe calls for cooking the milk, cream, and sugar until the sugar has dissolved. Then, we wouldmix with a cup, while adding vanila extract, We need an ice cream maker for churning according to themanufacturer's directions, but l don't know if l have it. We would need to serve immediately or ripen in thefreezer, Do you know what this recipe is for?" (Somewhat ofa long guery.)
 1. 空输入 / 极短查询
 help
 cake
@@ -67,16 +74,30 @@ Comment faire un gâteau au poivre du Sichuan
 
 
 # 改进
-## index部分
-data_preprocessing.py
-    修改ingest_to_chroma(threshold=100)中的threshold
 ## retriever
 处理query部分，让查找到的embeddings更准确
 ## generator
 prompt(可以用LangChain prompt hub https://python.langchain.com/docs/tutorials/rag/#orchestration)
 试一下不同的模型
+## 异常数据处理问题
+例如chocolate被标注为"candies, semisweet chocolate"导致无法匹配。是否可以直接修改数据集？
+"spices, pepper, black"
+## 数值调整
+根据nutrition排序的时候，retrieve_full_recipes的top_k值设置为多少比较合适？
 ## 其他
 考虑一些edge cases queries
 evaluation
 可以和膳食指南联系一下
+能否通过厨具-->preparation和菜品名-->title找到可以使用的菜谱？
 ## ddl April 24
+
+## 其他提示
+in your README.md in Github, providing the provenance of how you created your capability with respect to datainclude two aspects, which are part of the grading rubric:
+1. Reproducibility - lf someone wanted to, wouuld they be able to re-create your LLM? it's Ok if the data isn'topen source, and guite frankly, l would encourage it to the extent that we can verify your solutions. lf it'sclosed source and proprietary, please let us know how we can verify -- which leads me to the second
+criterion.
+2. Verifiability - Citing the appropriate passages and source material (in any return messages or outside of itwill provide confidence in the the text that it returns. lf you've not included the data in the repository, that istotally fine. Please have it available when demonstrating your work.
+
+
+# Data source
+https://www.reddit.com/r/Cooking/comments/2b4vt4/cookbook_download_mastering_the_art_of_french/
+https://www.klimareporter.de/images/dokumente/2023/03/3a84daaa-7c0b-4fcf-84c8-85aaa63683c4.pdf
