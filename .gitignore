@@ -45,7 +45,14 @@ models/
 # Chroma vectorstore
 chroma_db/
 chroma_db/*
+chroma_ingredients/
+chroma_title/
+chroma_ingredients/*
+chroma_title/*
+
+# DB
 *.sqlite3
+*.db
 
 # VSCode
 .vscode/
