@@ -132,6 +132,12 @@ def retrieve_full_recipes2(query: Dict,
         if len(final_results) >= top_k:
             return final_results
 
+    if (query["nutritions"] is not None) and (query["descending"] is not None):
+        final_results = top_k_by_nutrient(final_results, 
+                               nutrient=query["nutritions"], 
+                               k=5, 
+                               descending = query["descending"]) 
+
     return final_results
 
 

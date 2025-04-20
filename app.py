@@ -19,29 +19,26 @@ def retrive_recipes_ingredients(query:str):
     ids = retrieve_full_recipes2(query,"./recipes.json")
     return ids
 
-def retrive_recipes_nutritions(query:str,
-                               nutrition:str, # "energy""fat""protein""salt""saturates""sugars"
-                               descending:bool): #True为选出最高，False为选出最低的
-    ids = retrieve_full_recipes2(query,"./recipes.json")    
-    ranked = top_k_by_nutrient(ids, 
-                               nutrient=nutrition, 
-                               k=5, 
-                               descending = descending) 
-    return ranked
 
 def print_recipes(ids):
+    def format_float(value):
+        try:
+            return f"{float(value):.2f}"
+        except (ValueError, TypeError):
+            return value
+        
     for i, r in enumerate(ids, start=1):
         title = r.get("title", "N/A")
         raw_ings = r.get("ingredients", [])
         ingredients = [i["text"].split(",")[0].lower() for i in raw_ings if "text" in i and i["text"]]
         
         nutrition = r.get("nutr_values_per100g", {})
-        energy = nutrition.get("energy", "N/A")
-        fat = nutrition.get("fat", "N/A")
-        protein = nutrition.get("protein", "N/A")
-        salt = nutrition.get("salt", "N/A")
-        saturates = nutrition.get("saturates", "N/A")
-        sugars = nutrition.get("sugars", "N/A")
+        energy = format_float(nutrition.get("energy", "N/A"))
+        fat = format_float(nutrition.get("fat", "N/A"))
+        protein = format_float(nutrition.get("protein", "N/A"))
+        salt = format_float(nutrition.get("salt", "N/A"))
+        saturates = format_float(nutrition.get("saturates", "N/A"))
+        sugars = format_float(nutrition.get("sugars", "N/A"))
 
         print(f"\n[{i}] {title}")
         print("Ingredients:", ", ".join(ingredients))
@@ -52,8 +49,6 @@ def print_recipes(ids):
         print(f"  Salt: {salt}")
         print(f"  Saturates: {saturates}")
         print(f"  Sugars: {sugars}")
-
-# def retrive_recipes_kitchenware(input:str)
 
 
 if __name__ == "__main__":
@@ -72,7 +67,6 @@ if __name__ == "__main__":
             break
         print("🤖 Generating...\n")
         
-        # 对query进行处理？
         docs = retriever.invoke(query)
 
         answer = generate_answer(query, docs, generator)
@@ -86,7 +80,6 @@ if __name__ == "__main__":
         print("1. Search recipes (general)")
         print("2. Search by title only")
         print("3. Search by ingredients only")
-        # print("4. Search by nutrition (e.g. lowest fat)")
         print("0. Exit")
 
         choice = input("Enter your choice (1-5): ").strip()
@@ -107,8 +100,6 @@ if __name__ == "__main__":
             structured = query_classifier(user_query)
             results = retrive_recipes_ingredients(structured)
             print_recipes(results)
-
-        # elif choice == "4":
 
         elif choice == "0":
             print("👋 Exiting. Enjoy your cooking!")

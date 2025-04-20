@@ -14,12 +14,18 @@ def query_classifier(query):
         
         2. Classify the user query into following categories (can be multiple):
         - ingredients: mentions specific ingredients (e.g., "chicken and garlic")
-        - title: resembles a recipe name or dish (e.g., "how to make ramen")
+        - title: resembles a recipe name or dish (e.g., "how to make ramen", or includes health-based descriptors like "gluten-free", "keto", "lactose-free", "nut-free", "egg-free")
         - cooking_method: mentions a cooking technique (e.g., "boiling" or "baking")
 
         3. Extract key ingredients or concepts (as a list of keywords) from the query to assist in retrieving recipes. 
         - For ingredients_query: return specific ingredients.
         - For title_query or cooking_method_query: return key terms that help match relevant recipes. (delete "recipe" if there is)
+
+        4. If the query requests a nutritional preference (e.g., "low fat", "high protein"), extract:
+        - `"nutrition": <one of "energy", "fat", "protein", "salt", "saturates", "sugars">`
+        - `"descending": true` if the user wants **high** value (e.g., "high protein")
+        - `"descending": false` if the user wants **low** value (e.g., "low sugar")
+        - If no nutrition preference is mentioned, return `"nutrition": null` and `"descending": null`
 
         Your output should be a JSON object with the following structure:
         {{
@@ -36,7 +42,9 @@ def query_classifier(query):
             "cooking_methods": {{
                 "include": [...],
                 "exclude": [...]
-            }}
+            }},
+            "nutritions": one of ["energy", "fat", "protein", "salt", "saturates", "sugars", None],
+            "descending": true, false, or None
         }}  
         Only include keywords that are clearly stated or strongly implied in the query. 
         If a category does not apply, return an empty list for both `include` and `exclude`.
