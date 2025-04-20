@@ -11,6 +11,7 @@ pip install sentence-transformers
 pip install -U langchain-huggingface
 pip install transformers accelerate
 pip install -U langchain-chroma
+pip install -q -U langchain-google-genai
 
 
 # tests
