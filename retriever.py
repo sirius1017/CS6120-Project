@@ -1,6 +1,5 @@
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
 from data_preprocessing import load_recipes_from_json
 from typing import List, Dict
 from collections import defaultdict

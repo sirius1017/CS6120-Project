@@ -1,6 +1,8 @@
 # CS6120-Project
 This is final project for CS 6120 NLP
 
+# feature
+can run offline
 
 # install
 conda create --name rag python=3.9
@@ -15,6 +17,16 @@ pip install -U langchain-chroma
 pip install -q -U langchain-google-genai
 pip install -q -U streamlit 
 
+# How to use
+run "python data_preprocessing.py"
+
+
+# 用户交互
+1.RAG retrieval using structured database
+**2.** verify before executing expensive operations
+3.make API call to create
+4.print something during reasoning process?
+5.format outputs and references
 
 # tests
 ## basic recipes
@@ -76,6 +88,23 @@ Receta para un pastel sin azúcar ni harina
 Comment faire un gâteau au poivre du Sichuan  
 
 
+
+You may wish to have some broad queries and instances where your RAG system responds generally. For example, in your background section, most of the questions, e.g.,"What to cook tonight?" could return low confidence retrieved items, causing your RAG to be too scared to respond (in order to avoid hallucinations). These queries are generally common (because most people just don't like typing a lot.)
+
+Or, there's the opposite problem of typing *too much*, which could introduce issues in RAG systems. For example,
+
+"I've seen a recipe calls for cooking the milk, cream, and sugar until the sugar has dissolved. Then, we would mix with a cup, while adding vanilla extract. We need an ice cream maker for churning according to the manufacturer's directions, but I don't know if I have it. We would need to serve immediately or ripen in the freezer. Do you know what this recipe is for?"
+
+Along those lines, there have also been some questions that have popped up on the corner cases that either TA or myself could ask. For example, I would imagine your LLM may not be able to answer something like:
+
+* "What's a gluten-free recipe for pies that uses bread and meat?"
+
+It could potentially hallucinate in these cases. And finally, the RAG system should probably incorporate some notion of sequences:
+
+"Can you find me a recipe that does not have cherries and berries?" (This may be somewhat challenging because of the negation.)
+
+Would love to understand the differences between your work and ChefGPT
+
 # 改进
 ## retriever
 处理query部分，让查找到的embeddings更准确
@@ -88,6 +117,7 @@ prompt(可以用LangChain prompt hub https://python.langchain.com/docs/tutorials
 ## 数值调整
 根据nutrition排序的时候，retrieve_full_recipes的top_k值设置为多少比较合适？
 ## 其他
+记得替换一下google api key！！！！！！
 考虑一些edge cases queries
 evaluation
 可以和膳食指南联系一下
