@@ -7,7 +7,7 @@ import os
 import shutil
 from typing import Dict, List
 
-#调优：encoder现在用的是HuggingFaceEmbeddings，可能可以换一下试试
+#调优：encoder现在用的是HuggingFaceEmbeddings，可能可以换一下试试？
 #加速：batch embedding, batch write to chroma db
 #threshold：test用，最后需要去掉
 #计时
@@ -20,8 +20,9 @@ def prepare_documents(recipes: List[dict]) -> (List[Document], List[Document]):
         title = recipe.get("title", "Untitled")
 
         raw_ings = recipe.get("ingredients", [])
-        # !!!! 目前只提取各ingredient的第一个单词，但是遇到某些特殊数据出现问题
-        # eg. "candies, semisweet chocolate"
+
+        # # 只提取各ingredient的第一个单词
+        # # 存在的问题 eg. "candies, semisweet chocolate"
         first_words = [i["text"].split(",")[0].lower() for i in raw_ings if "text" in i and i["text"]]
         ingredients = ";".join(sorted(first_words))
 
@@ -44,7 +45,6 @@ def load_recipes_from_json(file_path: str) -> List[Dict]:
 
 
 def ingest_to_chroma(json_path="./recipes.json", 
-                    #  persist_directory="./chroma_db", 
                     persist_dir_title="./chroma_title", 
                     persist_dir_ingredients="./chroma_ingredients",
                     threshold=-1):
