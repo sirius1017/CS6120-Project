@@ -34,9 +34,7 @@ def download_dataset(url=None, output_dir=None, use_gdrive=True):
             return
         
         if use_gdrive:
-            ######### TODO: Replace with actual file ID ##########
-            gdrive_url = "https://drive.google.com/uc?id=YOUR_FILE_ID"
-            
+            gdrive_url = "https://drive.google.com/file/d/1Ts5iK3wcYWloyRmYk828p7g_6rU7XI88/view?usp=drive_link"
             print("Downloading from Google Drive...")
             gdown.download(gdrive_url, str(output_path), quiet=False)
             
