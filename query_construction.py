@@ -50,7 +50,7 @@ def query_classifier(query):
     def sort_and_join(keyword_list):
         return "; ".join(sorted(set(keyword_list)))
     
-    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key = os.getenv("GOOGLE_API_KEY"))
+    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key="AIzaSyDwaASu0nlEphtbTBpO8rW92bw43nHnwYw")
 
     classifier_chain = classifier_prompt | llm
     result = classifier_chain.invoke(input={"query": query})
@@ -85,22 +85,35 @@ def query_classifier(query):
         }
 
 if __name__ == "__main__":
-    # query_test1 = "Show me some recipes for making blueberry yogurt."
-    # res1= query_classifier(query_test1)
-    # print(res1)
+    # Test 1: Recipe title query
+    query_test1 = "Show me some recipes for making blueberry yogurt."
+    print("\nTest 1: Recipe title query")
+    res1 = query_classifier(query_test1)
+    print(res1)
 
-    # query_test2 = "Show me recipes of beef that use boiling"
-    # res2 = query_classifier(query_test2)
-    # print(res2)
+    # Test 2: Negation test
+    query_test2 = "Can you find me a dessert recipe that does not have cherries and berries"
+    print("\nTest 2: Negation test")
+    res2 = query_classifier(query_test2)
+    print(res2)
 
-    # query_test3 = "Give me recipes using beef and potatoes"
-    # res3= query_classifier(query_test3)
-    # print(res3)
-
-    # # Negation test
-    query_test4 = "Can you find me a dessert recipe that does not have cherries and berries"
-    res4= query_classifier(query_test4)
+    # Test 3: General query
+    query_test3 = "What to cook tonight?"
+    print("\nTest 3: General query")
+    res3 = query_classifier(query_test3)
+    print(res3)
+    
+    
+    # Test 4: Cooking method query
+    query_test4 = "Show me recipes of beef that use boiling"
+    print("\nTest 4: Cooking method query")
+    res4 = query_classifier(query_test4)
     print(res4)
+    
+
+    # query_test4 = "Show me recipes of beef that use boiling"
+    # res4 = query_classifier(query_test4)
+    # print(res4)
 
     # # General test
     # query_test5 = "What to cook tonight?"

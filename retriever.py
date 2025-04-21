@@ -184,7 +184,7 @@ if __name__ == "__main__":
         ingredients = [i["text"].split(",")[0].lower() for i in raw_ings if "text" in i and i["text"]]
         url = r.get("url", "N/A")
         print(f"\n[{i}] {title}")
-        print("Ingredients:", ", ".join(ingredients))
+        print("Ingredie  nts:", ", ".join(ingredients))
         print(f"url: {url}")
 
     print()
