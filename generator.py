@@ -59,7 +59,7 @@ Instructions: {instructions}
 Nutrition (per 100g): {', '.join(f'{k}: {v}' for k, v in nutrition.items())}"""
 
 def generate_answer(query: str, generator_pipeline, json_path: str = "./recipes.json"):
-    """Format prompt with context and generate answer using the generator."""
+    """Generate a new recipe based on user query and similar recipes as inspiration."""
     # Get query classification
     query_info = query_classifier(query)
     
@@ -67,7 +67,7 @@ def generate_answer(query: str, generator_pipeline, json_path: str = "./recipes.
     retrieved_recipes = retrieve_full_recipes2(
         query=query_info,
         json_path=json_path,
-        top_k=10
+        top_k=5  
     )
     
     # Format the classification information
@@ -85,33 +85,36 @@ def generate_answer(query: str, generator_pipeline, json_path: str = "./recipes.
     if query_info['nutritions']:
         classification_info += f"\n- Nutrition Focus: {query_info['nutritions']} ({'high' if query_info['descending'] else 'low'})"
 
-    # Format retrieved recipes
-    context = "\n\n".join(format_recipe(recipe) for recipe in retrieved_recipes)
+    # Format retrieved recipes as inspiration
+    inspiration_recipes = "\n\n".join(format_recipe(recipe) for recipe in retrieved_recipes)
     
-    prompt = f"""You are a helpful cooking assistant. Select the most appropriate recipe from the available recipes below and present it in a clear format.
+    prompt = f"""You are a creative cooking assistant. Generate a new recipe based on the user's requirements and use the provided recipes as inspiration.
 
 {classification_info}
 
-Available Recipes:
-{context}
+Inspiration Recipes (use these as reference but create something new):
+{inspiration_recipes}
 
 Question: {query}
 
-Select one recipe from the available recipes above and present it in this exact format:
+Generate a new recipe that matches the user's requirements. The recipe should be practical, balanced, and follow proper cooking principles. Present it in this format:
 
 1. Recipe Title:
-[Copy the exact title from the selected recipe]
+[Create an appropriate title for the new recipe]
 
 2. Ingredients:
-[List the ingredients exactly as they appear in the recipe]
+[List all ingredients with precise measurements]
 
 3. Cooking Instructions:
-[Copy the cooking instructions exactly as they appear in the recipe]
+[Provide clear, step-by-step cooking instructions]
 
 4. Nutritional Information:
-[Copy the nutritional information exactly as it appears in the recipe]
+[Include estimated nutritional values per 100g]
 
-Answer: Here is a recipe that matches your requirements:"""
+5. Cooking Tips:
+[Add helpful tips for best results]
+
+Answer: Here's a new recipe I've created based on your requirements:"""
 
     response = generator_pipeline(prompt)[0]["generated_text"]
     # Extract only the answer part after "Answer:"
