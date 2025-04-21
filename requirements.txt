@@ -3,16 +3,18 @@ torch>=2.0.0
 transformers>=4.30.0
 accelerate>=0.20.0
 sentence-transformers>=2.2.0
-langchain>=0.0.200
-langchain-community>=0.0.10
+langchain==0.3.23
+langchain-community==0.3.21
 langchain-huggingface>=0.0.5
 langchain-chroma>=0.0.5
 chromadb>=0.3.0
+langsmith==0.3.32
 tiktoken>=0.3.0
 python-dotenv>=1.0.0
 streamlit>=1.22.0
 seaborn>=0.12.0
 matplotlib>=3.7.0
+langchain-google-genai>=0.0.6
 
 # Data handling
 numpy>=1.24.0
