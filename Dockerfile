@@ -31,7 +31,7 @@ RUN echo '#!/bin/bash\n\
 echo "Downloading and processing recipe dataset..."\n\
 python3 download_data.py\n\
 echo "Starting the recipe generation system..."\n\
-python3 main.py' > /app/start.sh
+python3 app.py' > /app/start.sh
 
 # Make the script executable
 RUN chmod +x /app/start.sh
