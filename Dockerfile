@@ -26,15 +26,21 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
+# Create necessary directories
+RUN mkdir -p /app/data /app/chroma_title /app/chroma_ingredients /app/hf_cache
+
 # Create a script to download and process data
 RUN echo '#!/bin/bash\n\
 echo "Downloading and processing recipe dataset..."\n\
 python3 download_data.py\n\
 echo "Starting the recipe generation system..."\n\
-python3 app.py' > /app/start.sh
+streamlit run --server.port=8501 --server.address=0.0.0.0 app.py' > /app/start.sh
 
 # Make the script executable
 RUN chmod +x /app/start.sh
+
+# Expose Streamlit port
+EXPOSE 8501
 
 # Set the entry point
 ENTRYPOINT ["/app/start.sh"] 
