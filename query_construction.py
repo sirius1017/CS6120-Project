@@ -8,29 +8,30 @@ load_dotenv()
 def query_classifier(query):
     classifier_prompt = PromptTemplate.from_template(
         """You are a helpful AI cooking assistant. Your job is to analyze a user's recipe-related query and extract structured information for recipe retrieval.
-        1. Check the query is open-end or specific:
-        - `"intent": "open_ended"` if the user query is vague or general, such as "What should I cook tonight?" or "Show me something good"
-        - `"intent": "specific"` if the query includes details like ingredients, cooking methods, or dish types
-        
-        2. Classify the user query into following categories (can be multiple):
-        - ingredients: mentions specific ingredients (e.g., "chicken and garlic")
-        - title: resembles a recipe name or dish (e.g., "how to make ramen", or includes health-based descriptors like "gluten-free", "keto", "lactose-free", "nut-free", "egg-free")
-        - cooking_method: mentions a cooking technique (e.g., "boiling" or "baking")
 
-        3. Extract key ingredients or concepts (as a list of keywords) from the query to assist in retrieving recipes. 
-        - For ingredients_query: return specific ingredients.
-        - For title_query or cooking_method_query: return key terms that help match relevant recipes. (delete "recipe" if there is)
+        1. Classify the user query into the following types (can be multiple):
+        - ingredients: mentions specific ingredients (e.g., "chicken and garlic")
+        - title: resembles a recipe name or dish (e.g., "how to make ramen"), OR the query strongly implies a specific recipe or dish (e.g., "what is this recipe for?")
+        - instructions: mentions cooking steps, methods, or requirements (e.g., "fry the chicken", "mix the milk and flour")
+
+        3. Extract key requirements from corresponding types(as a list of keywords) from the query to assist in retrieving recipes. 
+        - ingredients: return specific ingredients.
+        - title or instructions: return key phrases that help match relevant recipes.
+            - For instructions, preserve meaningful **action-ingredient** combinations, such as “cook milk, cream, and sugar” or “churn in ice cream maker”.
+            - Exclude generic words like “recipe”, “dish”, or ambiguous phrasing.
 
         4. If the query requests a nutritional preference (e.g., "low fat", "high protein"), extract:
         - `"nutrition": <one of "energy", "fat", "protein", "salt", "saturates", "sugars">`
         - `"descending": true` if the user wants **high** value (e.g., "high protein")
         - `"descending": false` if the user wants **low** value (e.g., "low sugar")
-        - If no nutrition preference is mentioned, return `"nutrition": null` and `"descending": null`
+        - If no nutrition preference is mentioned, return `"nutrition": None` and `"descending": None`
+
+        5.  Ensure consistency:
+        - If any category (title, ingredients, instructions) contains non-empty "include" or "exclude" lists, it must also appear in the top-level `"type"` list.
 
         Your output should be a JSON object with the following structure:
         {{
-            "intent": one of ["open_ended", "specific"],
-            "type": ["title", "ingredients", "cooking_methods"],
+            "type": ["title", "ingredients", "instructions"],
             "title": {{
                 "include": [...],
                 "exclude": [...]
@@ -39,7 +40,7 @@ def query_classifier(query):
                 "include": [...],
                 "exclude": [...]
             }},
-            "cooking_methods": {{
+            "instructions": {{
                 "include": [...],
                 "exclude": [...]
             }},
@@ -66,11 +67,9 @@ def query_classifier(query):
     # Remove ```json ... ``` or ``` ... ``` if present
     content = re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip())
     
-    print("Raw LLM output:")
-    print(result.content)
     try:
         parsed = json.loads(content)
-        for section in ["title", "ingredients", "cooking_methods"]:
+        for section in ["title", "ingredients", "instructions"]:
             parsed[section]["include"] = sort_and_join(parsed[section]["include"])
         return parsed
     except json.JSONDecodeError:
@@ -86,10 +85,12 @@ def query_classifier(query):
                 "include": [],
                 "exclude": []
             },
-            "cooking_methods": {
+            "instructions": {
                 "include": [],
                 "exclude": []
-            }
+            },
+            "nutritions": None,
+            "descending": None
         }
 
 if __name__ == "__main__":

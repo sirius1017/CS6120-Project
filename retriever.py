@@ -82,7 +82,7 @@ def retrieve_full_recipes(query: Dict,
     # Embed all exclusion terms once
     exclude_vectors = [embeddings.embed_query(term) for term in exclude_keywords]
 
-    final_results =[]
+    temp_results =[]
 
     for mode in modes:
         if mode == "title":
@@ -101,28 +101,26 @@ def retrieve_full_recipes(query: Dict,
             embedding_function=embeddings
         )
 
-        results = vectorstore.as_retriever(query[mode]["include"], k=top_k)
-        final_results.append(results)
+        results = vectorstore.similarity_search(query[mode]["include"], k=top_k)
+        temp_results.append(results)
+    
+    all_results = [doc for result_list in temp_results for doc in result_list]
 
-    # final_results = []
-    # for recipe_id, _ in ranked_recipe_ids:
-    #     if recipe_id not in id_to_recipe:
-    #         continue
-    #     recipe = id_to_recipe[recipe_id]
-    #     recipe_text = f"{recipe.get('title', '')} {recipe.get('ingredients', '')}".lower()
-    #     if is_semantically_similar_to_exclude(recipe_text, exclude_vectors, embeddings):
-    #         continue
-    #     final_results.append(id_to_recipe[recipe_id])
-    #     if len(final_results) >= top_k:
-    #         return final_results
+    final_results = []
+    for r in all_results:
+        recipe_id = r.metadata.get("id")
+        recipe = id_to_recipe[recipe_id]
+        # recipe_text = f"{recipe.get('title', '')} {recipe.get('ingredients', '')}".lower()
+        # if is_semantically_similar_to_exclude(recipe_text, exclude_vectors, embeddings):
+        #     continue
+        final_results.append(id_to_recipe[recipe_id])
 
     # Sort the recipes by nutrition
     if (query["nutritions"] is not None) and (query["descending"] is not None):
         final_results = top_k_by_nutrient(final_results, 
-                               nutrient=query["nutritions"], 
-                               k=5, 
+                               nutrient=query["nutritions"],  
                                descending = query["descending"]) 
-
+    
     return final_results
 
 
@@ -163,7 +161,7 @@ if __name__ == "__main__":
     # query_test4 = "Can you find me a dessert recipe that does not have cherries and berries"
     # query= query_classifier(query_test4)
     # print(query)
-    query={'intent': 'specific', 'type': ['instructions'], 'title': {'include': '', 'exclude': []}, 'ingredients': {'include': 'chicken', 'exclude': []}, 'instructions': {'include': 'grill the chicken', 'exclude': []}, 'nutritions': None, 'descending': None}
+    query={'type': ['title', 'ingredients'], 'title': {'include': 'yogurt', 'exclude': []}, 'ingredients': {'include': '', 'exclude': []}, 'instructions': {'include': '', 'exclude': []}, 'nutritions': None, 'descending': None}
     path = "./recipes.json"
     result = retrieve_full_recipes(query, path)
     

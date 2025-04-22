@@ -7,7 +7,7 @@ can run offline
 # install
 conda create --name rag python=3.9
 conda activate rag
-pip install -q -U seaborn matplotlib
+pip install -q -U seaborn matplotlib gdown
 pip install langchain chromadb tiktoken python-dotenv
 pip install -U langchain-community
 pip install sentence-transformers
@@ -15,7 +15,7 @@ pip install -U langchain-huggingface
 pip install transformers accelerate
 pip install -U langchain-chroma
 pip install -q -U langchain-google-genai
-pip install -q -U streamlit 
+pip install -q -U streamlit ollama
 
 # How to use
 run "python data_preprocessing.py"

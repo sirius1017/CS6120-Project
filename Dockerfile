@@ -27,7 +27,7 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create necessary directories
-RUN mkdir -p /app/data /app/chroma_title /app/chroma_ingredients /app/hf_cache
+RUN mkdir -p /app/data /app/chroma_title /app/chroma_ingredients /app/chroma_instructions /app/hf_cache
 
 # Create a script to download and process data
 RUN echo '#!/bin/bash\n\
