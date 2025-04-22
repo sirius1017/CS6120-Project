@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  recipe-app:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    volumes:
+      - ./data:/app/data
+      - ./chroma_title:/app/chroma_title
+      - ./chroma_ingredients:/app/chroma_ingredients
+      - ./chroma_instructions:/app/chroma_instructions
+      - ./hf_cache:/app/hf_cache
+      - ./recipes.json:/app/recipes.json
+      - ./.env:/app/.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s 

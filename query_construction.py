@@ -60,7 +60,6 @@ def query_classifier(query):
         return "; ".join(sorted(set(keyword_list)))
     
     llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key = os.getenv("GOOGLE_API_KEY"))
-
     classifier_chain = classifier_prompt | llm
     result = classifier_chain.invoke(input={"query": query})
     content = result.content.strip()
