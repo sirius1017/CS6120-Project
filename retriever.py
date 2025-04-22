@@ -6,44 +6,44 @@ from collections import defaultdict
 import numpy as np
 from query_construction import query_classifier
 
-def retrieve_full_recipes(query: str,
-                          mode: str,
-                          json_path: str,
-                          top_k: int = 5):
-    full_recipes = load_recipes_from_json(json_path)
-    id_to_recipe = {r["id"]: r for r in full_recipes}
+# def retrieve_full_recipes(query: str,
+#                           mode: str,
+#                           json_path: str,
+#                           top_k: int = 5):
+#     full_recipes = load_recipes_from_json(json_path)
+#     id_to_recipe = {r["id"]: r for r in full_recipes}
 
-    if mode == "title":
-        persist_directory = "./chroma_title"
-    elif mode == "ingredient":
-        persist_directory = "./chroma_ingredients"
-    else:
-        print("input model wrong")
-        return
+#     if mode == "title":
+#         persist_directory = "./chroma_title"
+#     elif mode == "ingredient":
+#         persist_directory = "./chroma_ingredients"
+#     else:
+#         print("input model wrong")
+#         return
 
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2",
-        cache_folder="./hf_cache",
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True}
-    )
+#     embeddings = HuggingFaceEmbeddings(
+#         model_name="sentence-transformers/all-MiniLM-L6-v2",
+#         cache_folder="./hf_cache",
+#         model_kwargs={"device": "cpu"},
+#         encode_kwargs={"normalize_embeddings": True}
+#     )
 
-    vectorstore = Chroma(
-        persist_directory=persist_directory,
-        embedding_function=embeddings
-    )
+#     vectorstore = Chroma(
+#         persist_directory=persist_directory,
+#         embedding_function=embeddings
+#     )
 
-    results = vectorstore.similarity_search(query, k=top_k)
+#     results = vectorstore.similarity_search(query, k=top_k)
 
-    matched = []
-    for doc in results:
-        recipe_id = doc.metadata.get("id")
-        if recipe_id in id_to_recipe:
-            matched.append(id_to_recipe[recipe_id])
-        else:
-            print(f"⚠️ Recipe id '{recipe_id}' not found in JSON.")
+#     matched = []
+#     for doc in results:
+#         recipe_id = doc.metadata.get("id")
+#         if recipe_id in id_to_recipe:
+#             matched.append(id_to_recipe[recipe_id])
+#         else:
+#             print(f"⚠️ Recipe id '{recipe_id}' not found in JSON.")
 
-    return matched
+#     return matched
 
 
 def cosine_similarity(vec1, vec2):
@@ -63,9 +63,7 @@ def is_semantically_similar_to_exclude(recipe_text: str, exclude_vectors: List[L
     return False
 
 
-def retrieve_full_recipes2(query: Dict,
-                        #   modes: List[str],
-                        #  exclude_keywords: List[str],
+def retrieve_full_recipes(query: Dict,
                           json_path: str,
                           top_k: int = 5):
     full_recipes = load_recipes_from_json(json_path)
@@ -80,19 +78,19 @@ def retrieve_full_recipes2(query: Dict,
     )
 
     modes = query["type"]
-    exclude_keywords = (query["title"]["exclude"] + query["ingredients"]["exclude"] + query["cooking_methods"]["exclude"])
+    exclude_keywords = (query["title"]["exclude"] + query["ingredients"]["exclude"] + query["instructions"]["exclude"])
     # Embed all exclusion terms once
     exclude_vectors = [embeddings.embed_query(term) for term in exclude_keywords]
 
-
-    # Score dictionary {recipe_id -> list of similarity scores}
-    recipe_scores = defaultdict(list)
+    final_results =[]
 
     for mode in modes:
         if mode == "title":
             persist_directory = "./chroma_title"
         elif mode == "ingredients":
             persist_directory = "./chroma_ingredients"
+        elif mode == 'instructions':
+            persist_directory = "./chroma_instructions"
         else:
             print(f"⚠️ Invalid mode: {mode}")
             continue
@@ -103,35 +101,22 @@ def retrieve_full_recipes2(query: Dict,
             embedding_function=embeddings
         )
 
-        results = vectorstore.similarity_search_with_score(query[mode]["include"], k=top_k+5)
-        print(len(results))
+        results = vectorstore.as_retriever(query[mode]["include"], k=top_k)
+        final_results.append(results)
 
-        for doc, score in results:
-            recipe_id = doc.metadata.get("id")
-            if recipe_id:
-                recipe_scores[recipe_id].append(score)
+    # final_results = []
+    # for recipe_id, _ in ranked_recipe_ids:
+    #     if recipe_id not in id_to_recipe:
+    #         continue
+    #     recipe = id_to_recipe[recipe_id]
+    #     recipe_text = f"{recipe.get('title', '')} {recipe.get('ingredients', '')}".lower()
+    #     if is_semantically_similar_to_exclude(recipe_text, exclude_vectors, embeddings):
+    #         continue
+    #     final_results.append(id_to_recipe[recipe_id])
+    #     if len(final_results) >= top_k:
+    #         return final_results
 
-    # Aggregate scores (average across all matched modes)
-    aggregated_scores = {
-        recipe_id: np.mean(scores)
-        for recipe_id, scores in recipe_scores.items()
-    }
-
-    # Sort by score descending
-    ranked_recipe_ids = sorted(aggregated_scores.items(), key=lambda x: x[1], reverse=False)
-
-    final_results = []
-    for recipe_id, _ in ranked_recipe_ids:
-        if recipe_id not in id_to_recipe:
-            continue
-        recipe = id_to_recipe[recipe_id]
-        recipe_text = f"{recipe.get('title', '')} {recipe.get('ingredients', '')}".lower()
-        if is_semantically_similar_to_exclude(recipe_text, exclude_vectors, embeddings):
-            continue
-        final_results.append(id_to_recipe[recipe_id])
-        if len(final_results) >= top_k:
-            return final_results
-
+    # Sort the recipes by nutrition
     if (query["nutritions"] is not None) and (query["descending"] is not None):
         final_results = top_k_by_nutrient(final_results, 
                                nutrient=query["nutritions"], 
@@ -143,7 +128,7 @@ def retrieve_full_recipes2(query: Dict,
 
 def top_k_by_nutrient(recipes: List[Dict], 
                       nutrient: str, # "energy""fat""protein""salt""saturates""sugars"
-                      k: int = 5, 
+                    #   k: int = 5, 
                       descending: bool = True # 默认降序，从大到小
                       ) -> List[Dict]:
     """按任意 nutrient 值排序（升序或降序），返回 top-k"""
@@ -156,8 +141,7 @@ def top_k_by_nutrient(recipes: List[Dict],
         key=lambda r: r["nutr_values_per100g"][nutrient],
         reverse=descending
     )
-    return sorted_recipes[:k]
-
+    return sorted_recipes
 
 # def load_retriever(persist_directory: str = "./chroma_db"):
 #     """Load ChromaDB-based retriever using HuggingFace embeddings."""
@@ -179,9 +163,9 @@ if __name__ == "__main__":
     # query_test4 = "Can you find me a dessert recipe that does not have cherries and berries"
     # query= query_classifier(query_test4)
     # print(query)
-    query={'intent': 'specific', 'type': ['ingredients'], 'title': {'include': [], 'exclude': []}, 'ingredients': {'include': 'beans;onions', 'exclude': ['sauce']}, 'cooking_methods': {'include': '', 'exclude': []}}
+    query={'intent': 'specific', 'type': ['instructions'], 'title': {'include': '', 'exclude': []}, 'ingredients': {'include': 'chicken', 'exclude': []}, 'instructions': {'include': 'grill the chicken', 'exclude': []}, 'nutritions': None, 'descending': None}
     path = "./recipes.json"
-    result = retrieve_full_recipes2(query, path)
+    result = retrieve_full_recipes(query, path)
     
     for i, r in enumerate(result, start=1):
         title = r.get("title", "N/A")
@@ -193,4 +177,3 @@ if __name__ == "__main__":
         print(f"url: {url}")
 
     print()
-
