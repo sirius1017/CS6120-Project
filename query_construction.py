@@ -58,8 +58,7 @@ def query_classifier(query):
     def sort_and_join(keyword_list):
         return "; ".join(sorted(set(keyword_list)))
     
-    # llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key = os.getenv("GOOGLE_API_KEY"))
-    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key = "AIzaSyCijvzpqXqbSD1w2UkEiE1caU6lfvLgSbM")
+    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key = os.getenv("GOOGLE_API_KEY"))
 
     classifier_chain = classifier_prompt | llm
     result = classifier_chain.invoke(input={"query": query})
@@ -107,9 +106,9 @@ if __name__ == "__main__":
     # print(res3)
 
     # # Negation test
-    query_test4 = "Can you find me a dessert recipe that does not have cherries and berries"
-    res4= query_classifier(query_test4)
-    print(res4)
+    # query_test4 = "Can you find me a dessert recipe that does not have cherries and berries"
+    # res4= query_classifier(query_test4)
+    # print(res4)
 
     # # General test
     # query_test5 = "What to cook tonight?"
@@ -120,3 +119,12 @@ if __name__ == "__main__":
     # query_test6 = "I am allergic to banana. Can you find me a dessert recipe for me"
     # res6= query_classifier(query_test6)
     # print(res6)
+
+    # Long query test
+    query_test7 = "I've seen a recipe calls for cooking the milk,\
+          cream, and sugar until the sugar has dissolved. Then, we would mix with a cup, \
+            while adding vanilla extract. We need an ice cream maker for churning according to the manufacturer's directions, \
+                but I don't know if I have it. We would need to serve immediately or ripen in the freezer. \
+                    Do you know what this recipe is for?"
+    res7 = query_classifier(query_test7)
+    print(res7)
