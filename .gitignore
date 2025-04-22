@@ -74,3 +74,6 @@ debug.log
 *.test_output
 *.checkpoint
 .env
+recipes.json
+.env
+recipes.json
