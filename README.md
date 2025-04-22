@@ -19,12 +19,15 @@ pip install -q -U streamlit ollama
 ollama pull gemma3
 
 
-# 需要单独配置的文件
+# configuration files
 .env (including GOOGLE_API_KEY="XXX")
 recipes.json
 
 # How to use
-run "python data_preprocessing.py"
+1. ensure you installed everything
+2. ensure you have config files
+2. run "python data_preprocessing.py"
+3. run "streamlit run app.py"
 
 
 # 用户交互
