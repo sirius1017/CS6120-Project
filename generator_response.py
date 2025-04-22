@@ -143,8 +143,8 @@ def generate_response(query, path="./recipes.json"):
    
 
 if __name__=="__main__":
-    query1 = "I've seen a recipe calls for cooking the milk, cream, and sugar until the sugar has dissolved. Then, we would mix with a cup, while adding vanilla extract. We need an ice cream maker for churning according to the manufacturer's directions, but I don't know if I have it. We would need to serve immediately or ripen in the freezer. Do you know what this recipe is for?"
-    generate_response(query1)
+    #query1 = "I've seen a recipe calls for cooking the milk, cream, and sugar until the sugar has dissolved. Then, we would mix with a cup, while adding vanilla extract. We need an ice cream maker for churning according to the manufacturer's directions, but I don't know if I have it. We would need to serve immediately or ripen in the freezer. Do you know what this recipe is for?"
+    #generate_response(query1)
 
-    # query2 = "Can you find me a yogurt recipe without fruit"
-    # generate_response(query2)
+     query2 = "Can you find me a yogurt recipe without fruit"
+     generate_response(query2)
