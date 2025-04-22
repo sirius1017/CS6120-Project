@@ -13,7 +13,6 @@ services:
       - ./chroma_ingredients:/app/chroma_ingredients
       - ./chroma_instructions:/app/chroma_instructions
       - ./hf_cache:/app/hf_cache
-      - ./recipes.json:/app/recipes.json
       - ./.env:/app/.env
     deploy:
       resources:
