@@ -16,6 +16,12 @@ pip install transformers accelerate
 pip install -U langchain-chroma
 pip install -q -U langchain-google-genai
 pip install -q -U streamlit ollama
+ollama pull gemma3
+
+
+# 需要单独配置的文件
+.env (including GOOGLE_API_KEY="XXX")
+recipes.json
 
 # How to use
 run "python data_preprocessing.py"

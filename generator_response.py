@@ -138,6 +138,8 @@ def generate_response(query, path="./recipes.json"):
     # Print the final answer
     print(response['message']['content'])
     
+    return response['message']['content']
+    
    
 
 if __name__=="__main__":

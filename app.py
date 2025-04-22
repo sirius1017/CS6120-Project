@@ -1,5 +1,3 @@
-# from retriever import load_retriever
-from generator import load_generator
 from generator_response import generate_response
 from SUPPORTED_MODELS import SUPPORTED_MODELS 
 from query_construction import query_classifier
@@ -258,7 +256,7 @@ if __name__ == "__main__":
     # Load the generator model on startup (can be CPU if no GPU)
     try:
         device = "cuda" if "CUDA_VISIBLE_DEVICES" in os.environ else "cpu"
-        generator = load_generator(model_key="deepseek", device=device)
+        # generator = load_generator(model_key="deepseek", device=device)
         generator_loaded = True
         print("Recipe generator loaded successfully!")
     except Exception as e:
