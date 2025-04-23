@@ -62,7 +62,7 @@ def summarize_instructions(recipes, path):
     print(f"✅ Saved {len(summaries)} summaries to {path}")
 
 def load_or_create_vectorstore(docs, embeddings, persist_dir):
-    if os.path.exists(os.path.join(persist_dir, "index")):
+    if os.path.exists(os.path.join(persist_dir, "chroma.sqlite3")):
         print(f"✅ Loading existing vectorstore from: {persist_dir}")
         return Chroma(
             embedding_function=embeddings,
@@ -172,6 +172,4 @@ if __name__ == "__main__":
     # # ingest_to_chroma(threshold=100) #试运行转换为embeddings
     ingest_to_chroma() # recipes--> embeddings
     # summarize_instructions(recipes, "./summarized_instructions.json")
-
-
 
