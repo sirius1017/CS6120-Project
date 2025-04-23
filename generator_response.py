@@ -46,6 +46,14 @@ def build_context_from_recipe_json(recipe):
 
     return "\n".join(context_parts)
 
+def extract_exclude_fields(query_dict):
+    exclude_items = []
+
+    for section in ["title", "ingredients", "instructions"]:
+        if section in query_dict and "exclude" in query_dict[section]:
+            exclude_items.extend(query_dict[section]["exclude"])
+
+    return ", ".join(exclude_items)
 # generator_cache = {}
 
 # def load_generator(model_key="gemma3", device="cuda"):
@@ -70,45 +78,6 @@ def build_context_from_recipe_json(recipe):
 #     return ollama_generator
 
 def generate_response(query, path="./recipes.json"):
-
-
-    gen_prompt = PromptTemplate.from_template("""
-    You are a helpful recipe assistant. A user asked the following question:
-
-    "{query}"
-
-    Here are some potentially relevant recipes or fragments:
-
-    {context}
-
-    Some relevant recipes may not match the question. 
-    Based on the question and the provided recipes, generate 1-2 recipes matching the user's requirements. 
-    You need to pay attention to 
-    -vague query: if the query is too general or open ended and there is no relavant context, 
-        "I’m sorry, I couldn’t find a matching recipe based on your request." and tell user give some specific ideas
-    -long query: try to analyze long query before generate response.
-    -negation: if there are "without", "not" , "doesn't", but context may have, remember to replace and tell the user
-    -Avoid hallucinating responses 
-    The recipe should be practical, accurate, balanced, and follow proper cooking principles. Present it in this format:
-
-    1. Recipe Title:
-    [Create an appropriate title for the new recipe]
-
-    2. Ingredients:
-    [List all ingredients with precise measurements]
-
-    3. Cooking Instructions:
-    [Provide clear, step-by-step cooking instructions]
-
-    4. Nutritional Information:
-    [Include estimated nutritional values per 100g]
-
-    5. Cooking Tips:
-    [Add helpful tips for best results]
-    
-    also add source if there is a url
-    """)
-
     query_classified = query_classifier(query)
     
     # Retrieving
@@ -118,6 +87,107 @@ def generate_response(query, path="./recipes.json"):
     context = "\n\n".join([
         build_context_from_recipe_json(recipe) for recipe in retrieved_docs
     ])
+    exclude_items = extract_exclude_fields(query_classified)
+
+    # General query:
+    if len(retrieved_docs) == 0:
+        gen_prompt = PromptTemplate.from_template("""
+        You are a helpful recipe assistant. A user asked the following question:
+
+        "{query}"
+
+        The query is too general or open-ended, and no relevant recipes were found based on the current database.
+
+        Please provide 2-3 general cooking ideas or themes that might inspire the user (e.g., “try a hearty soup,” “explore rice-based dishes,” “make a simple stir-fry”). Do not generate full recipes.
+
+        Politely encourage the user to ask again with more specific details only for ingredients, such as:
+        - Key ingredients they want to use or avoid
+
+        The goal is to guide the user toward a clearer request without guessing or hallucinating.
+        """)
+    elif len(exclude_items) != 0:
+        gen_prompt = PromptTemplate.from_template("""
+        You are a helpful recipe assistant. A user asked the following question:
+
+        "{query}"
+
+        Here are some potentially relevant recipes or fragments:
+
+        {context}
+
+        The user specifically requested to exclude the following ingredients or elements: {exclude_items}.
+        You must strictly ensure none of these appear in your generated recipe, even if they appear in the context.
+
+        Pay close attention to the following:
+
+        1. **Exclusion / Negation Handling**:  
+        - Remove or substitute any matching ingredients or instructions from the generated recipes.
+        - Clearly acknowledge this in your response. Start the recipe with a statement like:  
+            **"As requested, here is a recipe without {exclude_items}."**
+        - Avoid including similar or related ingredients that may violate the intent of the exclusion (e.g., avoid oats if nuts are excluded unless clarified).
+
+        2. **Relevance to User Intent**:  
+        Ensure the recipe is aligned with other parts of the query (e.g., dish type, method) while respecting exclusions.
+
+        The recipe should be practical, accurate, and follow sound cooking principles. Present it in this format:
+
+        1. Recipe Title:
+        [Create an appropriate title for the new recipe]
+
+        2. Ingredients:
+        [List all ingredients with precise measurements — none should include {exclude_items}]
+
+        3. Cooking Instructions:
+        [Provide clear, step-by-step cooking instructions]
+
+        4. Nutritional Information:
+        [Include estimated nutritional values per 100g]
+
+        5. Cooking Tips:
+        [Add helpful tips for best results]
+        
+        6. Inspiration Origin: 
+        [Relevant recipe title]  
+        """)
+    else:
+        gen_prompt = PromptTemplate.from_template("""
+        You are a helpful recipe assistant. A user asked the following question:
+
+        "{query}"
+
+        Here are some potentially relevant recipes or fragments:
+
+        {context}
+
+        Some relevant recipes may not match the question. 
+        Based on the question and the provided recipes, generate 1–2 recipes that accurately match the user's requirements.
+
+        **Long Query Handling**:  
+        If the query is long or detailed, think step by step. Focus only on the cooking-related elements (e.g., ingredients, method, dish type).
+
+        Avoid hallucinations and make sure the recipe is practical, accurate, and follows sound cooking principles.
+
+        Format your answer like this:
+
+        1. Recipe Title:
+        [Appropriate title]
+
+        2. Ingredients:
+        [Precise measurements]
+
+        3. Cooking Instructions:
+        [Step-by-step instructions]
+
+        4. Nutritional Information:
+        [Estimates per 100g]
+
+        5. Cooking Tips:
+        [Helpful advice]
+
+        6. Inspiration Origin: 
+        [Relevant recipe title]                         
+        """)
+
     # if we use chatmodel api
     # llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key = os.getenv("GOOGLE_API_KEY"))
 
@@ -129,7 +199,7 @@ def generate_response(query, path="./recipes.json"):
 
     # Send to Ollama's Gemma model
     # Transfer the gen_prompt to string 
-    prompt = gen_prompt.format(query=query, context=context)
+    prompt = gen_prompt.format(query=query, context=context, exclude_items=exclude_items)
     response = chat(
         model="gemma3:latest",
         messages=[{"role": "user", "content": prompt}]
@@ -137,14 +207,22 @@ def generate_response(query, path="./recipes.json"):
 
     # Print the final answer
     print(response['message']['content'])
-    
-    return response['message']['content']
+    return(response['message']['content'])
     
    
 
 if __name__=="__main__":
-    #query1 = "I've seen a recipe calls for cooking the milk, cream, and sugar until the sugar has dissolved. Then, we would mix with a cup, while adding vanilla extract. We need an ice cream maker for churning according to the manufacturer's directions, but I don't know if I have it. We would need to serve immediately or ripen in the freezer. Do you know what this recipe is for?"
-    #generate_response(query1)
+    # query1 = "I've seen a recipe calls for cooking the milk, cream, and sugar until the sugar has dissolved. Then, we would mix with a cup, while adding vanilla extract. We need an ice cream maker for churning according to the manufacturer's directions, but I don't know if I have it. We would need to serve immediately or ripen in the freezer. Do you know what this recipe is for?"
+    # generate_response(query1)
 
-     query2 = "Can you find me a yogurt recipe without fruit"
-     generate_response(query2)
+    # query2 = "Can you find me a yogurt recipe without fruit"
+    # generate_response(query2)
+
+    # query3 = "give me a dessert without milk or nuts"
+    # generate_response(query3)
+
+    # query4 = "What to cook tonight?"
+    # generate_response(query4)
+    
+    query5 = "give me a recipe with mango and cream"
+    generate_response(query5)

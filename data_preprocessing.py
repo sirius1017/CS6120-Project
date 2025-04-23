@@ -150,7 +150,7 @@ def ingest_to_chroma(json_path="./recipes.json",
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2",
         cache_folder="./hf_cache",
-        model_kwargs={"device": "gpu"}, ###################### GPU
+        model_kwargs={"device": "cuda"}, ###################### GPU
         encode_kwargs={"batch_size": 128, "normalize_embeddings": True}
     )
 

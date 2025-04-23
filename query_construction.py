@@ -11,12 +11,13 @@ def query_classifier(query):
 
         1. Classify the user query into the following types (can be multiple):
         - ingredients: mentions specific ingredients (e.g., "chicken and garlic")
-        - title: resembles a recipe name or dish (e.g., "how to make ramen"), OR the query strongly implies a specific recipe or dish (e.g., "what is this recipe for?")
+        - title: resembles a recipe name or dish (e.g., "how to make ramen") OR refers to a broad category of food (e.g., "dessert", "salad", "pasta")
         - instructions: mentions cooking steps, methods, or requirements (e.g., "fry the chicken", "mix the milk and flour")
 
         3. Extract key requirements from corresponding types(as a list of keywords) from the query to assist in retrieving recipes. 
+        - title: title: include the name of the dish or the general category (e.g., "dessert", "pasta") but do **not** include the word "recipe"
         - ingredients: return specific ingredients.
-        - title or instructions: return key phrases that help match relevant recipes.
+        - instructions: return key phrases that help match relevant recipes.
             - For instructions, preserve meaningful **action-ingredient** combinations, such as “cook milk, cream, and sugar” or “churn in ice cream maker”.
             - Exclude generic words like “recipe”, “dish”, or ambiguous phrasing.
 
@@ -70,6 +71,7 @@ def query_classifier(query):
         parsed = json.loads(content)
         for section in ["title", "ingredients", "instructions"]:
             parsed[section]["include"] = sort_and_join(parsed[section]["include"])
+        print(parsed)
         return parsed
     except json.JSONDecodeError:
         print("❌ Failed to parse JSON:")
