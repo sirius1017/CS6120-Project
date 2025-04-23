@@ -59,7 +59,7 @@ sleep 5\n\
 \n\
 # Pull the Gemma model if not already pulled\n\
 echo "Pulling Gemma model..."\n\
-ollama pull gemma3:latest\n\
+ollama pull ${MODEL}\n\
 \n\
 echo "Starting the recipe generation system..."\n\
 streamlit run --server.port=8501 --server.address=0.0.0.0 app.py' > /app/start.sh

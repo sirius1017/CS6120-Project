@@ -160,7 +160,7 @@ def generate_response(query, path="./recipes.json"):
         {context}
 
         Some relevant recipes may not match the question. 
-        Based on the question and the provided recipes, generate 1–2 recipes that accurately match the user's requirements.
+        Based on the question and the provided recipes, generate 1-2 recipes that accurately match the user's requirements.
 
         **Long Query Handling**:  
         If the query is long or detailed, think step by step. Focus only on the cooking-related elements (e.g., ingredients, method, dish type).
@@ -201,7 +201,7 @@ def generate_response(query, path="./recipes.json"):
     # Transfer the gen_prompt to string 
     prompt = gen_prompt.format(query=query, context=context, exclude_items=exclude_items)
     response = chat(
-        model="gemma3:latest",
+        model="gemma3:12b",
         messages=[{"role": "user", "content": prompt}]
     )
 

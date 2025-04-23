@@ -72,7 +72,7 @@ def query_classifier(query):
         for section in ["ingredients"]:
             parsed[section]["include"] = sort_and_join(parsed[section]["include"])
         for section in ["title", "instructions"]:
-            parsed[section]["include"] = " ".join(parsed[section]["include"])
+            parsed[section]["include"] = ",".join(parsed[section]["include"])
             
         print(parsed)
         return parsed
