@@ -69,8 +69,11 @@ def query_classifier(query):
     
     try:
         parsed = json.loads(content)
-        for section in ["title", "ingredients", "instructions"]:
+        for section in ["ingredients"]:
             parsed[section]["include"] = sort_and_join(parsed[section]["include"])
+        for section in ["title", "instructions"]:
+            parsed[section]["include"] = " ".join(parsed[section]["include"])
+            
         print(parsed)
         return parsed
     except json.JSONDecodeError:
