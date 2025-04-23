@@ -100,7 +100,18 @@ def run_evaluation():
         "Give me a dessert without nuts and milk",
         "How to make ice cream without an ice cream maker?",
         "I want a vegetarian pasta recipe high in protein",
-        "Find me a recipe that includes yogurt but no fruit"
+        "Find me a recipe that includes yogurt but no fruit",
+        "What to cook of dinner tonight",
+        "I've seen a recipe calls for cooking the milk,\
+          cream, and sugar until the sugar has dissolved. Then, we would mix with a cup, \
+            while adding vanilla extract. We need an ice cream maker for churning according to the manufacturer's directions, \
+                but I don't know if I have it. We would need to serve immediately or ripen in the freezer. \
+                    Do you know what this recipe is for?",
+        "I want something sweet",
+        "What can I cook with no dairry n no meat?",
+        "Give me a healthy dinner",
+        "I feel like eating something cozy",
+        "Can you give me a cherry cake without any cherries?"
     ]
 
     for i, query in enumerate(test_queries, 1):

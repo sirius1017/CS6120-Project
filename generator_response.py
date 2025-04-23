@@ -201,7 +201,7 @@ def generate_response(query, path="./recipes.json"):
     # Transfer the gen_prompt to string 
     prompt = gen_prompt.format(query=query, context=context, exclude_items=exclude_items)
     response = chat(
-        model="gemma3:12b",
+        model="gemma3:latest",
         messages=[{"role": "user", "content": prompt}]
     )
 
