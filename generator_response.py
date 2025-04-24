@@ -28,7 +28,7 @@ def build_context_from_recipe_json(recipe):
 
     # Format nutritions list
     nutrition_texts = [
-        f"- {key}: {value:.2f} g/100g" for key, value in nutritions.items()
+        f"- {key}: {value:.2f} /100g" for key, value in nutritions.items()
     ]
 
     context_parts = [
@@ -77,6 +77,23 @@ def extract_exclude_fields(query_dict):
 #     generator_cache[model_key] = ollama_generator
 #     return ollama_generator
 
+def is_query_long(query: str, threshold: int = 25):
+    """
+    Selects the appropriate prompt template based on query length.
+    
+    Args:
+        query (str): The user's input query.
+        threshold (int): Word count threshold to consider a query "long".
+
+    Returns:
+        PromptTemplate: Either long_query_prompt or normal_query_prompt.
+    """
+    word_count = len(query.strip().split())
+    if word_count > threshold:
+        return True
+    else:
+        return False
+    
 def generate_response(query, path="./recipes.json"):
     query_classified = query_classifier(query)
     
@@ -87,10 +104,14 @@ def generate_response(query, path="./recipes.json"):
     context = "\n\n".join([
         build_context_from_recipe_json(recipe) for recipe in retrieved_docs
     ])
+
+    # Print retrieved documents
+    print(context)
     exclude_items = extract_exclude_fields(query_classified)
 
-    # General query:
+    # Generate response based on different promot
     if len(retrieved_docs) == 0:
+        # General Query
         gen_prompt = PromptTemplate.from_template("""
         You are a helpful recipe assistant. A user asked the following question:
 
@@ -106,6 +127,7 @@ def generate_response(query, path="./recipes.json"):
         The goal is to guide the user toward a clearer request without guessing or hallucinating.
         """)
     elif len(exclude_items) != 0:
+        # negation based query
         gen_prompt = PromptTemplate.from_template("""
         You are a helpful recipe assistant. A user asked the following question:
 
@@ -140,7 +162,7 @@ def generate_response(query, path="./recipes.json"):
         3. Cooking Instructions:
         [Provide clear, step-by-step cooking instructions]
 
-        4. Nutritional Information:
+        4. Nutritional Information (per 100g, kcal for energy, g for others):
         [Include estimated nutritional values per 100g]
 
         5. Cooking Tips:
@@ -149,9 +171,10 @@ def generate_response(query, path="./recipes.json"):
         6. Inspiration Origin: 
         [Relevant recipe title]  
         """)
-    else:
+    elif is_query_long(query):
+        # long query
         gen_prompt = PromptTemplate.from_template("""
-        You are a helpful recipe assistant. A user asked the following question:
+        You are a helpful recipe assistant. A user asked the following detailed question:
 
         "{query}"
 
@@ -159,11 +182,13 @@ def generate_response(query, path="./recipes.json"):
 
         {context}
 
-        Some relevant recipes may not match the question. 
-        Based on the question and the provided recipes, generate 1-2 recipes that accurately match the user's requirements.
+        Some relevant recipes may not match the question.
 
-        **Long Query Handling**:  
-        If the query is long or detailed, think step by step. Focus only on the cooking-related elements (e.g., ingredients, method, dish type).
+        **Step-by-Step Reasoning Required**:  
+        The query is long or detailed. Start by breaking down the key cooking-related elements, such as ingredients, cooking method, dish type, and dietary restrictions.  
+        Think step by step to ensure accurate understanding. Disregard unrelated or vague parts of the query.
+
+        Then generate 1-2 recipes that best match the cooking intent of the user.
 
         Avoid hallucinations and make sure the recipe is practical, accurate, and follows sound cooking principles.
 
@@ -178,23 +203,60 @@ def generate_response(query, path="./recipes.json"):
         3. Cooking Instructions:
         [Step-by-step instructions]
 
-        4. Nutritional Information:
-        [Estimates per 100g]
+        4. Nutritional Information (per 100g, kcal for energy, g for others):
+        [Include estimated nutritional values per 100g]
 
         5. Cooking Tips:
         [Helpful advice]
 
         6. Inspiration Origin: 
-        [Relevant recipe title]                         
+        [Relevant recipe title]
+        """)
+    else:
+        # Normal query
+        gen_prompt = PromptTemplate.from_template("""
+        You are a helpful recipe assistant. A user asked the following question:
+
+        "{query}"
+
+        Here are some potentially relevant recipes or fragments:
+
+        {context}
+
+        Some relevant recipes may not match the question.
+                                                   
+        Based on the question and the provided recipes, generate 1-2 recipes that accurately match the user's requirements.                                                           
+        
+        Avoid hallucinations and make sure the recipe is practical, accurate, and follows sound cooking principles.
+
+        Format your answer like this:
+
+        1. Recipe Title:
+        [Appropriate title]
+
+        2. Ingredients:
+        [Precise measurements]
+
+        3. Cooking Instructions:
+        [Step-by-step instructions]
+
+        4. Nutritional Information (per 100g, kcal for energy, g for others):
+        [Include estimated nutritional values per 100g]
+
+        5. Cooking Tips:
+        [Helpful advice]
+
+        6. Inspiration Origin: 
+        [Relevant recipe title]
         """)
 
     # if we use chatmodel api
     # llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key = os.getenv("GOOGLE_API_KEY"))
 
-    # llm = Client(host='http://localhost:11434')
+    # # llm = Client(host='http://localhost:11434')
     # llm_chain = gen_prompt | llm
 
-    # response = llm_chain.invoke({"query": query, "context": context})
+    # response = llm_chain.invoke({"query": query, "context": context, "exclude_items": exclude_items})
     # print(response.content)
 
     # Send to Ollama's Gemma model
@@ -202,7 +264,8 @@ def generate_response(query, path="./recipes.json"):
     prompt = gen_prompt.format(query=query, context=context, exclude_items=exclude_items)
     response = chat(
         model="gemma3:latest",
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
+        options={"temperature": 0.0}
     )
 
     # Print the final answer
@@ -224,5 +287,14 @@ if __name__=="__main__":
     # query4 = "What to cook tonight?"
     # generate_response(query4)
     
-    query5 = "give me a recipe with mango and cream"
-    generate_response(query5)
+    # query5 = "give me a recipe with mango and cream"
+    # generate_response(query5)
+
+    query6 = "I want to make yogurt"
+    generate_response(query6)
+
+    # query7 = "Give me a yogurt recipe"
+    # generate_response(query7)
+
+    # query8 = "What can I cook with no dairry n no meat?"
+    # generate_response(query8)
