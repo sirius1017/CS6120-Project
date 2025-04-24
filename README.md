@@ -1,4 +1,4 @@
-# CS6120-Project Cooking Recipe Inspiration with RAG
+# Cooking Recipe Inspiration with RAG
 This project implements a Retrieval-Augmented Generation (RAG) system that intelligently generates recipe suggestions based on natural language queries. Instead of relying solely on a large language model (LLM), our system first retrieves relevant recipes from a curated dataset and then uses the retrieved context to guide the final generation.
 
 ## Key Features
