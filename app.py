@@ -153,7 +153,7 @@ if __name__ == "__main__":
     # User input
     user_input = st.text_input(
         "🤔 What kind of recipe would you like me to create?", 
-        placeholder="e.g. give me a dessert without milk",
+        placeholder="e.g. I want to make yogurt",
         label_visibility="visible"
     )
 
