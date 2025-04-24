@@ -3,7 +3,7 @@ This project implements a Retrieval-Augmented Generation (RAG) system that intel
 
 ## Key Features
 - Retrieval-Augmented Generation (RAG) with LangChain
-- Gemma model support
+- Hugging Face, Gemini API & Gemma3 model support
 - Context-aware recipe generation
 - JSON-based recipe filtering and querying
 
